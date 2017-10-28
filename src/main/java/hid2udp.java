@@ -16,6 +16,8 @@ public class hid2udp {
 	static HidDevice hidDevice;
 	static DatagramSocket serverSocket;
 	static int numFloats;
+    static ByteOrder be;
+
 	
 	public static void main(String[] args)
 	{
@@ -24,11 +26,14 @@ public class hid2udp {
 		int packetSize = 64;
 	    numFloats = (packetSize / 4) - 1;
 	    InetAddress IPAddress;
-	    int port ;
-	    ByteOrder be = ByteOrder.LITTLE_ENDIAN;
+	    int port,read,val;
 		boolean HIDconnected = true;
 		byte[] receiveData = new byte[packetSize];
 		byte[] sendData = new byte[packetSize];
+		byte[] message;
+		be = ByteOrder.LITTLE_ENDIAN;
+		
+		DatagramPacket sendPacket;
 		try {
 			serverSocket = new DatagramSocket(9876);
 		} catch (SocketException e1) {
@@ -59,16 +64,16 @@ public class hid2udp {
 				{
 	
 		            serverSocket.receive(receivePacket);
-					byte[] message = receivePacket.getData();
+					message = receivePacket.getData();
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
 					
-		            int val = hidDevice.write(message, message.length, (byte) 0);
+		            val = hidDevice.write(message, message.length, (byte) 0);
 					
 					if (val > 0) 
 					{
-						int read = hidDevice.read(message, 1000);
-			            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+						read = hidDevice.read(message, 1000);
+			            sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			            serverSocket.send(sendPacket);
 
 						if (read > 0) {
@@ -130,13 +135,14 @@ public class hid2udp {
 		
 	}
 	
+	
 	static float[] parse(byte[] bytes) 
     {
         float[] returnValues = new float[numFloats];
-
-        // println "Parsing packet"
-        for (int i = 0; i < 1; i++) {
-            int baseIndex = i ;
+        int baseIndex;
+        
+        for (int i = 0; i < numFloats; i++) {
+            baseIndex = (i*4)+4;
             returnValues[i] = ByteBuffer.wrap(bytes).order(be).getFloat(baseIndex);
         }
 
