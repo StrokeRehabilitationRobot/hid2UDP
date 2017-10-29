@@ -65,6 +65,8 @@ public class hid2udp {
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
 		            printArray(parse(message));
+					System.out.println(getID(message));
+
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
 					if (val > 0) 
