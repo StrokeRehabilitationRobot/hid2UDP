@@ -19,7 +19,7 @@ public class hid2udp {
     static ByteOrder be;
 
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws SocketException
 	{
 		hidServices = null;
 		hidDevice = null;
@@ -33,17 +33,12 @@ public class hid2udp {
 		byte[] message;
 		be = ByteOrder.LITTLE_ENDIAN;
 		
-		DatagramPacket sendPacket;
-		try {
-			serverSocket = new DatagramSocket(9876);
-		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+		
+		serverSocket = new DatagramSocket(9876);
+		
+		
 		
 
-		//connect to the deveince
 		connect();
 		
 		
@@ -62,23 +57,26 @@ public class hid2udp {
 				
 				try 
 				{
-	
+					DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+
+		
 		            serverSocket.receive(receivePacket);
 					message = receivePacket.getData();
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
-					
+		            printArray(parse(message));
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
 					if (val > 0) 
 					{
 						read = hidDevice.read(message, 1000);
-			            sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+			            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			            serverSocket.send(sendPacket);
 
 						if (read > 0) {
 							
 							printArray(parse(message));
+							System.out.println(getID(message));
 						} 
 						else 
 						{
@@ -90,17 +88,18 @@ public class hid2udp {
 				catch (Throwable t) 
 				{
 					t.printStackTrace(System.out);
-					disconnect();
+					//disconnect();
 				}
 			}
 			
-			if (hidDevice != null) {
-				hidDevice.close();
-			}
-			if (hidServices != null) {
-				// Clean shutdown
-				hidServices.shutdown();
-			}
+//			if (hidDevice != null) {
+//				hidDevice.close();
+//				
+//			}
+//			if (hidServices != null) {
+//				// Clean shutdown
+//				hidServices.shutdown();
+//			}
 		}
 		
 	}
@@ -117,15 +116,17 @@ public class hid2udp {
 	public static void connect()
 	{
 		
-		int vid = 0;
-		int pid = 0;
+		int vid = 0x3742;
+		int pid = 0x7;
 		
 		if (hidServices == null)
 			hidServices = HidManager.getHidServices();
 		// Provide a list of attached devices
 		hidDevice = null;
-		for (HidDevice h : hidServices.getAttachedHidDevices()) {
-			if (h.isVidPidSerial(vid, pid, null)) {
+		for (HidDevice h : hidServices.getAttachedHidDevices()) 
+		{
+			if (h.isVidPidSerial(vid, pid, null)) 
+			{
 				hidDevice = h;
 				hidDevice.open();
 				System.out.println("Found! " + hidDevice);
@@ -135,12 +136,18 @@ public class hid2udp {
 		
 	}
 	
+	static int getID(byte[] bytes)
+	{
+		
+		return bytes[0];
+		
+	}
 	
 	static float[] parse(byte[] bytes) 
     {
         float[] returnValues = new float[numFloats];
         int baseIndex;
-        
+   
         for (int i = 0; i < numFloats; i++) {
             baseIndex = (i*4)+4;
             returnValues[i] = ByteBuffer.wrap(bytes).order(be).getFloat(baseIndex);
