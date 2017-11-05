@@ -66,13 +66,15 @@ public class hid2udp {
 		            port = receivePacket.getPort();
 		            //printArray(parse(message));
 					//System.out.println(getID(message));
-		            
+		            long startTime = System.nanoTime();
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
 					if (val > 0) 
 					{
 						read = hidDevice.read(message, 1000);
-			            
+						long endTime = System.nanoTime();
+						
+			            System.out.println((endTime - startTime)/1000000.0 );
 						if (read > 0) {
 							//System.out.println("asldjf");
 							//printArray(parse(message));
