@@ -65,7 +65,7 @@ public class hid2udp {
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
 		            //printArray(parse(message));
-					//System.out.println(getID(message));
+					System.out.println(getID(message));
 		            long startTime = System.nanoTime();
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
@@ -74,10 +74,9 @@ public class hid2udp {
 						read = hidDevice.read(message, 1000);
 						long endTime = System.nanoTime();
 						
-			            System.out.println((endTime - startTime)/1000000.0 );
 						if (read > 0) {
 							//System.out.println("asldjf");
-							//printArray(parse(message));
+							printArray(parse(message));
 							//System.out.println(getID(message));
 				            sendPacket = new DatagramPacket(message, message.length, IPAddress, port);
 							serverSocket.send(sendPacket);
