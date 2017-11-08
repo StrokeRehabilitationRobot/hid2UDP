@@ -17,13 +17,14 @@ public class hid2udp {
 	static DatagramSocket serverSocket;
 	static int numFloats;
     static ByteOrder be;
+    static int packetSize;
 
 	
 	public static void main(String[] args) throws SocketException
 	{
 		hidServices = null;
 		hidDevice = null;
-		int packetSize = 64;
+		packetSize = 64;
 	    numFloats = (packetSize / 4) - 1;
 	    InetAddress IPAddress;
 	    int port,read,val;
@@ -64,15 +65,17 @@ public class hid2udp {
 					message = receivePacket.getData();
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
-		            //printArray(parse(message));
-					System.out.println(getID(message));
-		            long startTime = System.nanoTime();
+		            float [] uncodedMessage = parse(message);
+		            byte [] recodedMessage = command(uncodedMessage); 
+		            printArray(parse(recodedMessage));
+					System.out.println(getID(recodedMessage));
+					
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
 					if (val > 0) 
 					{
 						read = hidDevice.read(message, 1000);
-						long endTime = System.nanoTime();
+						
 						
 						if (read > 0) {
 							//System.out.println("asldjf");
@@ -143,9 +146,7 @@ public class hid2udp {
 	static int getID(byte[] bytes)
 	{
 		
-		
-		return bytes[0];
-		
+		return bytes[0];	
 	}
 	
 	static float[] parse(byte[] bytes) 
@@ -154,12 +155,24 @@ public class hid2udp {
         int baseIndex;
    
         for (int i = 0; i < numFloats; i++) {
-            baseIndex = (i*4)+4;
+            baseIndex = (i*4);
             returnValues[i] = ByteBuffer.wrap(bytes).order(be).getFloat(baseIndex);
         }
 
         return returnValues;
     }
+	
+	
+	static byte[] command(float[] values)
+	{
+		byte[] message = new byte[packetSize];
+		ByteBuffer.wrap(message).order(be).putInt(0, (int)values[0]).array();
+		for (int i = 0; i < numFloats && i < values.length; i++) {
+			int baseIndex = (4 * i) + 4;
+			ByteBuffer.wrap(message).order(be).putFloat(baseIndex, values[i]).array();
+		}
+		return message;
+	}
 	
 	static void printArray(float[] anArray) 
 	{
