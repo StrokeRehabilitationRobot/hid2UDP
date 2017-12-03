@@ -59,16 +59,17 @@ public class hid2udp {
 				
 				try 
 				{
+					//UDP
 					receivePacket = new DatagramPacket(receiveData, receiveData.length);
-		
 		            serverSocket.receive(receivePacket);
 					message = receivePacket.getData();
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
+		            
 		            float [] uncodedMessage = parse(message);
 		            byte [] recodedMessage = command(uncodedMessage); 
 		            printArray(parse(recodedMessage));
-					System.out.println(getID(recodedMessage));
+					System.out.println(getID(message));
 					
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
@@ -79,7 +80,7 @@ public class hid2udp {
 						
 						if (read > 0) {
 							//System.out.println("asldjf");
-							printArray(parse(message));
+							//printArray(parse(message));
 							//System.out.println(getID(message));
 				            sendPacket = new DatagramPacket(message, message.length, IPAddress, port);
 							serverSocket.send(sendPacket);
@@ -155,7 +156,7 @@ public class hid2udp {
         int baseIndex;
    
         for (int i = 0; i < numFloats; i++) {
-            baseIndex = (i*4);
+            baseIndex = (i*4)+4;
             returnValues[i] = ByteBuffer.wrap(bytes).order(be).getFloat(baseIndex);
         }
 

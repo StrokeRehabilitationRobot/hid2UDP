@@ -9,5 +9,5 @@ bin/
 *.settings
 *.project
 /.gradle/
-gradel-*
-*.bat
+
+
