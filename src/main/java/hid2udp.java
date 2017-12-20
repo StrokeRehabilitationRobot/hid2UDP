@@ -69,7 +69,7 @@ public class hid2udp {
 		            float [] uncodedMessage = parse(message);
 		            byte [] recodedMessage = command(uncodedMessage); 
 		            printArray(uncodedMessage);
-					//System.out.println( "ID " + getID(message));
+					System.out.println( "ID " + getID(message));
 					System.out.println( "board " + getBoard(message));
 					
 		            val = hidDevice.write(message, message.length, (byte) 0);
@@ -148,7 +148,7 @@ public class hid2udp {
 	static int getID(byte[] bytes)
 	{
 		
-		return bytes[1];	
+		return bytes[4];	
 	}
 	
 	static int getBoard(byte[] bytes)
