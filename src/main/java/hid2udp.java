@@ -24,7 +24,7 @@ public class hid2udp {
 	{
 		hidServices = null;
 		hidDevice = null;
-		packetSize = 64;
+		packetSize = 70;
 	    numFloats = (packetSize / 4) - 1;
 	    InetAddress IPAddress;
 	    int port,read,val;
@@ -67,8 +67,10 @@ public class hid2udp {
 		            port = receivePacket.getPort();
 		            
 		            float [] uncodedMessage = parse(message);
-		            byte [] recodedMessage = command(uncodedMessage); 
 		            printArray(uncodedMessage);
+					System.out.println( "ID " + getID(message));
+					System.out.println( "board " + getBoard(message));
+					message = removeBoardID(message);
 					System.out.println( "ID " + getID(message));
 					System.out.println( "board " + getBoard(message));
 					
@@ -101,18 +103,11 @@ public class hid2udp {
 				}
 			}
 			
-//			if (hidDevice != null) {
-//				hidDevice.close();
-//				
-//			}
-//			if (hidServices != null) {
-//				// Clean shutdown
-//				hidServices.shutdown();
-//			}
 		}
 		
 	}
 	
+	//shuts things down
 	public static void disconnect()
 	{
 		
@@ -145,20 +140,35 @@ public class hid2udp {
 		
 	}
 	
+	// returns the message ID number
 	static int getID(byte[] bytes)
-	{
-		
-		return bytes[4];	
-	}
-	
-	static int getBoard(byte[] bytes)
 	{
 		
 		return bytes[0];	
 	}
 	
+	//return the board number
+	static int getBoard(byte[] bytes)
+	{
+		
+		
+		return bytes[0];	
+	}
 	
+	static byte[] removeBoardID(byte[] bytes)
+	{
+		byte[] message = new byte[64];
+		
+		for (int i = 0; i < 64; i++)
+		{
+			message[i] = bytes[i+4];
+		}
+		
+		return message;
+		
+	}
 	
+	// Returns the float array of the bytes
 	static float[] parse(byte[] bytes) 
     {
         float[] returnValues = new float[numFloats];
