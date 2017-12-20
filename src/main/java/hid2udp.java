@@ -68,8 +68,8 @@ public class hid2udp {
 		            
 		            float [] uncodedMessage = parse(message);
 		            byte [] recodedMessage = command(uncodedMessage); 
-		            printArray(parse(recodedMessage));
-					System.out.println(getID(message));
+		            //printArray(parse(recodedMessage));
+					//System.out.println(getID(message));
 					
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
