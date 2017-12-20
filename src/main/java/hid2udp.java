@@ -27,11 +27,12 @@ public class hid2udp {
 		packetSize = 70;
 	    numFloats = (packetSize / 4) - 1;
 	    InetAddress IPAddress;
-	    int port,read,val;
+	    int port,read,val,boardID;
 		boolean HIDconnected = true;
 		byte[] receiveData = new byte[packetSize];
 		byte[] sendData = new byte[packetSize];
 		byte[] message;
+		byte[] rawMessage;
 		be = ByteOrder.LITTLE_ENDIAN;
 		
 		
@@ -62,17 +63,22 @@ public class hid2udp {
 					//UDP
 					receivePacket = new DatagramPacket(receiveData, receiveData.length);
 		            serverSocket.receive(receivePacket);
-					message = receivePacket.getData();
+					rawMessage = receivePacket.getData();
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
 		            
-		            float [] uncodedMessage = parse(message);
-		            printArray(uncodedMessage);
-					System.out.println( "ID " + getID(message));
-					System.out.println( "board " + getBoard(message));
-					message = removeBoardID(message);
-					System.out.println( "ID " + getID(message));
-					System.out.println( "board " + getBoard(message));
+		            boardID = getID(rawMessage); //get the board ID
+		            message = removeBoardID(rawMessage); //remake message without the board
+		            
+		            //Testing print test statements
+		            
+		            //float [] uncodedMessage = parse(message);
+		            //printArray(uncodedMessage);
+					//System.out.println( "ID " + getID(rawMessage));
+					//choose the board to send message
+					//System.out.println( "board " + getBoard(rawMessage));
+					//System.out.println( "ID " + getID(message));
+					//System.out.println( "board " + getBoard(message));
 					
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
@@ -144,7 +150,7 @@ public class hid2udp {
 	static int getID(byte[] bytes)
 	{
 		
-		return bytes[0];	
+		return bytes[1];	
 	}
 	
 	//return the board number
