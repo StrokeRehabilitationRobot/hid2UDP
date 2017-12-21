@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.hid4java.HidDevice;
@@ -13,6 +14,7 @@ import org.hid4java.HidServices;
 public class hid2udp {
 
 	static HidServices hidServices;
+	static ArrayList<HidDevice> boards;
 	static HidDevice hidDevice;
 	static DatagramSocket serverSocket;
 	static int numFloats;
@@ -24,6 +26,7 @@ public class hid2udp {
 	{
 		hidServices = null;
 		hidDevice = null;
+		boards = new ArrayList<HidDevice>();
 		packetSize = 70;
 	    numFloats = (packetSize / 4) - 1;
 	    InetAddress IPAddress;
@@ -67,7 +70,7 @@ public class hid2udp {
 					IPAddress = receivePacket.getAddress();
 		            port = receivePacket.getPort();
 		            
-		            boardID = getID(rawMessage); //get the board ID
+		            boardID = getBoardID(rawMessage); //get the board ID
 		            message = removeBoardID(rawMessage); //remake message without the board
 		            
 		            //Testing print test statements
@@ -79,7 +82,9 @@ public class hid2udp {
 					//System.out.println( "board " + getBoard(rawMessage));
 					//System.out.println( "ID " + getID(message));
 					//System.out.println( "board " + getBoard(message));
-					
+		            System.out.println("board " + boardID);
+		            hidDevice = boards.get(boardID);
+		            
 		            val = hidDevice.write(message, message.length, (byte) 0);
 					
 					if (val > 0) 
@@ -128,17 +133,19 @@ public class hid2udp {
 		
 		int vid = 0x3742;
 		int pid = 0x7;
+		HidDevice hidTemp = null;
 		
 		if (hidServices == null)
 			hidServices = HidManager.getHidServices();
 		// Provide a list of attached devices
-		hidDevice = null;
+		
 		for (HidDevice h : hidServices.getAttachedHidDevices()) 
 		{
 			if (h.isVidPidSerial(vid, pid, null)) 
 			{
 				hidDevice = h;
 				hidDevice.open();
+				boards.add(hidDevice);
 				System.out.println("Found! " + hidDevice);
 
 			}
@@ -154,7 +161,7 @@ public class hid2udp {
 	}
 	
 	//return the board number
-	static int getBoard(byte[] bytes)
+	static int getBoardID(byte[] bytes)
 	{
 		
 		
