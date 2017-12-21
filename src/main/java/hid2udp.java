@@ -82,7 +82,7 @@ public class hid2udp {
 					//System.out.println( "board " + getBoard(rawMessage));
 					//System.out.println( "ID " + getID(message));
 					//System.out.println( "board " + getBoard(message));
-		            System.out.println("board " + boardID);
+		            //System.out.println("board " + boardID);
 		            hidDevice = boards.get(boardID);
 		            
 		            val = hidDevice.write(message, message.length, (byte) 0);
